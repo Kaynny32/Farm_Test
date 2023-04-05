@@ -18,12 +18,11 @@ public class GardenSpawner : MonoBehaviour
     int _idDestroy;
     
     float _time = 10.0f;
-    
+    GameObject obj;
 
     public bool _isTimer = false;
     public bool _activ = true;
     public static GardenSpawner instance = null;
-    public List<GameObject> _grassListClone = new List<GameObject>();
 
     private void OnTriggerEnter(Collider other)
     {
@@ -56,21 +55,22 @@ public class GardenSpawner : MonoBehaviour
             }
         }
     }
-
+    
     void Spawn()
     {
         var activ = true;
         if (_activ)
         {
-            _grassListClone.Add(Instantiate(_grassPrefabs, _pointPosition));
-            _anim.AnimGrass(_grassListClone[0], _pointPosition1, 14.0f, false);
+            GameObject _grassListClone;
+            _grassListClone = Instantiate(_grassPrefabs, _pointPosition);
+            _anim.AnimGrass(_grassListClone, _pointPosition1, 14.0f, false);
             _activ = false;
-            HeightGrass.instance.Timer(activ);            
+            HeightGrass.instance.Timer(activ);
+            obj = _grassListClone;
         }
     }
     public void GrassCloneDestroy()
     {
-        Destroy(_grassListClone[_idDestroy]);
-        _grassListClone.RemoveAt(_idDestroy);
+        Destroy(obj);
     }
 }

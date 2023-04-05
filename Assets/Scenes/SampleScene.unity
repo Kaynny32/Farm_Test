@@ -358,7 +358,6 @@ MonoBehaviour:
   _idDestroy: 0
   _isTimer: 0
   _activ: 1
-  _grassListClone: []
 --- !u!65 &572057725
 BoxCollider:
   m_ObjectHideFlags: 0
