@@ -1,80 +1,98 @@
-using DG.Tweening;
 using System.Collections;
 using System.Collections.Generic;
-using System.Threading;
 using UnityEngine;
+using StarterAssets;
+using TMPro;
+using DG.Tweening;
 
 public class PlayerController : MonoBehaviour
 {
-    [Header("Scripts")]
     [SerializeField]
-    DotweenAnim _anim;
+    ThirdPersonControllerAI ThirdPersonControllerAI;
 
-    [Header("Block")]
-    [SerializeField]
-    GameObject _prefabsBlock;
-    List<GameObject> _prefabsBlockClone = new List<GameObject>();
-    [SerializeField]
-    Transform _spawnPointblock;
+    GrassBlock _tempGrassBlock;
 
-    [Header("Backpack")]
-    [SerializeField]
-    GameObject _prefabsBackpack;
-    [SerializeField]
-    List<GameObject> _prefabsBackpackkClone = new List<GameObject>();
-    [SerializeField]
-    Transform _spawnPointBackpack;
+    int _grassCount = 0;
+    int _moneyCount;
 
-    [Header("DOTween")]
     [SerializeField]
-    Transform _point;
+    TextMeshProUGUI _grassCountText;
+    [SerializeField]
+    TextMeshProUGUI _moneyCountText;
 
-    bool _activ = true;
+    [SerializeField]
+    GameObject _grassBlock;
+    [SerializeField]
+    Transform _grassSpawnPoint;
 
-    public static PlayerController instance = null;
+    [SerializeField]
+    Transform _shopPoint;
 
-    void Awake()
+    private void Start()
     {
-        if (instance == null)
-            instance = this;
-    } 
-    public void SpawnBlock()
-    {
-        _prefabsBlockClone.Add(Instantiate(_prefabsBlock, _spawnPointblock));        
+        _grassCountText.text = _grassCount + "/40";
     }
-    public void BackpackSpawn()
+    private void OnTriggerStay(Collider other)
     {
-        _prefabsBackpackkClone.Add(Instantiate(_prefabsBackpack, _spawnPointBackpack));
-        Destroy(_prefabsBlockClone[0]);
-        _prefabsBlockClone.RemoveAt(0);
-        ScoreP();
-    }
-    public void BackpackDestroy()
-    {
-         _anim.AnimDOT(_prefabsBackpackkClone[0], _point, 3.5f, false);
-        Loom.QueueOnMainThread(() =>
+        if (other.GetComponent<GrassBlock>())
         {
-            Destroy(_prefabsBackpackkClone[0]);
-            _prefabsBackpackkClone.RemoveAt(0);
-            ScoreM();
-        },4f);
-        
-    }
-    private void ScoreP()
-    {
-        if (_prefabsBackpackkClone.Count <= 40)
-        {
-            GameManager.instance.ScoreBlockInt++;
+            Attack();
+            _tempGrassBlock = other.GetComponent<GrassBlock>();
         }
-        else if (_prefabsBackpackkClone.Count >= 40)
+        if (other.GetComponent<Shop>())
         {
-            Destroy(_prefabsBackpackkClone[0]);
-            _prefabsBackpackkClone.RemoveAt(0);
+            if (_grassCount > 0)
+            {
+                other.GetComponent<Shop>().GetGrass(_grassBlock, _shopPoint, _grassSpawnPoint);
+                StartCoroutine(GetMoney());
+            }
         }
     }
-    private void ScoreM()
+    private void OnTriggerEnter(Collider other)
     {
-        GameManager.instance.ScoreBlockInt--;
-        GameManager.instance.ScoreMonyInt += 15;
+        if (other.GetComponent<PackOfGrass>())
+        {           
+            if (_grassCount < 40)
+            {
+                other.GetComponent<PackOfGrass>().PickUpedByPlayer();
+                PickUp();
+            }            
+        }        
+    }
+    
+    void Attack()
+    {
+        ThirdPersonControllerAI.GetAnimator().Play("Attack");
+    }
+    public void OnAttackFromAnim()
+    {
+        _tempGrassBlock.GetHit();
+    }
+    bool _active = false;
+    public void PickUp()
+    {
+        if (_grassCount == 0)
+        {
+            var go = Instantiate(_grassBlock, _grassSpawnPoint);
+            go.GetComponent<ConfigurableJoint>().connectedBody = _grassSpawnPoint.GetComponent<Rigidbody>();
+        }
+        _grassCount++;
+        _grassCountText.text = _grassCount + "/40";
+        DOTween.Sequence()
+            .Append(_grassCountText.transform.DOScale(new Vector3(0, 0, 0), 0.2f))
+            .AppendInterval(0.1f)
+            .Append(_grassCountText.transform.DOScale(new Vector3(1, 1, 1), 0.2f));
+    }
+    IEnumerator GetMoney()
+    {
+        _grassCount -= 1;
+        _moneyCount += 15;
+        DOTween.Sequence()
+            .Append(_moneyCountText.transform.DOScale(new Vector3(0, 0, 0), 5f))
+            .AppendInterval(0.1f)
+            .Append(_moneyCountText.transform.DOScale(new Vector3(1, 1, 1), 0.3f));
+        yield return new WaitForSeconds(5);        
+        _grassCountText.text = _grassCount + "/40";       
+        _moneyCountText.text = _moneyCount.ToString();
     }
 }

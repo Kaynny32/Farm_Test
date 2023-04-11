@@ -45,6 +45,9 @@ namespace StarterAssets {
         [Tooltip("What layers the character uses as ground")]
         public LayerMask GroundLayers;
 
+        [SerializeField]
+        PlayerController _playerController;
+
         // player
         private float _speed;
         private float _animationBlend;
@@ -251,6 +254,14 @@ namespace StarterAssets {
 
             // when selected, draw a gizmo in the position of, and matching radius of, the grounded collider
             Gizmos.DrawSphere(new Vector3(transform.position.x, transform.position.y - GroundedOffset, transform.position.z), GroundedRadius);
+        }
+        public Animator GetAnimator()
+        {
+            return _animator;
+        }
+        public void OnAttack()
+        {
+            _playerController.OnAttackFromAnim();
         }
     }
 }
