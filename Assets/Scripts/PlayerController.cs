@@ -83,15 +83,16 @@ public class PlayerController : MonoBehaviour
             .AppendInterval(0.1f)
             .Append(_grassCountText.transform.DOScale(new Vector3(1, 1, 1), 0.2f));
     }
+    ShakeRandomnessMode r;
     IEnumerator GetMoney()
     {
         _grassCount -= 1;
         _moneyCount += 15;
         DOTween.Sequence()
-            .Append(_moneyCountText.transform.DOScale(new Vector3(0, 0, 0), 5f))
-            .AppendInterval(0.1f)
-            .Append(_moneyCountText.transform.DOScale(new Vector3(1, 1, 1), 0.3f));
-        yield return new WaitForSeconds(5);        
+        .Append(_moneyCountText.transform.DOShakeScale(2f,1f, 2, 0f, false, ShakeRandomnessMode.Harmonic))
+        .AppendInterval(0.2f)
+        .Append(_moneyCountText.transform.DOScale(new Vector3(1, 1, 1), 0.1f));
+        yield return new WaitForSeconds(2f);        
         _grassCountText.text = _grassCount + "/40";       
         _moneyCountText.text = _moneyCount.ToString();
     }

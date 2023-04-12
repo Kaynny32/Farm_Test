@@ -30,8 +30,8 @@ public class Shop : MonoBehaviour
     IEnumerator GetMoney()
     {
         var go = Instantiate(_prefabscoin, _conteiner.transform);
-        go.transform.DOMove(_movePoint.transform.position, 5f);
-        yield return new WaitForSeconds(5f);
+        go.transform.DOMove(_movePoint.transform.position, 2f);
+        yield return new WaitForSeconds(2f);
         Destroy (go);        
     }
 }
